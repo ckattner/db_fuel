@@ -1,0 +1,9 @@
+.DS_Store
+*.gem
+/tmp
+/coverage
+Gemfile.lock
+/pkg
+
+/spec/config/database.yaml
+/spec/db

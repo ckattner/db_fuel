@@ -1,0 +1,35 @@
+AllCops:
+  TargetRubyVersion: 2.5
+  NewCops: enable
+
+Layout/LineLength:
+  Max: 100
+  Exclude:
+    - db_fuel.gemspec
+
+Metrics/BlockLength:
+  ExcludedMethods:
+    - let
+    - it
+    - describe
+    - context
+    - specify
+    - define
+
+Metrics/MethodLength:
+  Max: 30
+
+Metrics/AbcSize:
+  Max: 25
+
+Metrics/ClassLength:
+  Max: 125
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
