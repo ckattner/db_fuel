@@ -9,6 +9,9 @@
 
 require 'active_record'
 require 'acts_as_hashable'
+require 'burner'
+require 'dbee'
+require 'dbee/providers/active_record_provider'
 require 'objectable'
 
-require_relative 'db_fuel/package'
+require_relative 'db_fuel/library'

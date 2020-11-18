@@ -1,6 +1,9 @@
 env:
   global:
-    - CC_TEST_REPORTER_ID=
+    - CC_TEST_REPORTER_ID=2d57d597269e2cb04a63d0a7262927cf811abb7ab528da7de681943b212b4134
+  jobs:
+    - AR_VERSION=5
+    - AR_VERSION=6
 language: ruby
 rvm:
   # Build on the latest stable of all supported Rubies (https://www.ruby-lang.org/en/downloads/):
@@ -12,6 +15,7 @@ before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+  - cp spec/config/database.yaml.ci spec/config/database.yaml
 script:
   - bundle exec rubocop
   - bundle exec rspec spec --format documentation

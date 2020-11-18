@@ -25,11 +25,12 @@ Metrics/AbcSize:
 Metrics/ClassLength:
   Max: 125
 
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
 Style/TrailingCommaInHashLiteral:
   Enabled: false
 
 Style/TrailingCommaInArrayLiteral:
   Enabled: false
 
-Style/Documentation:
-  Enabled: false

@@ -7,9 +7,12 @@
 # LICENSE file in the root directory of this source tree.
 #
 
+require 'active_record'
 require 'pry'
 require 'securerandom'
 require 'yaml'
+
+require 'db_helper'
 
 unless ENV['DISABLE_SIMPLECOV'] == 'true'
   require 'simplecov'
@@ -21,11 +24,14 @@ unless ENV['DISABLE_SIMPLECOV'] == 'true'
   end
 end
 
-TEMP_DIR = File.join('tmp', 'spec')
-
 RSpec.configure do |config|
   config.before(:suite) do
-    FileUtils.rm_rf(TEMP_DIR)
+    connect_to_db(:sqlite)
+    load_schema
+  end
+
+  config.before(:each) do
+    clear_data
   end
 end
 
