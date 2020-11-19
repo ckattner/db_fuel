@@ -38,3 +38,7 @@ end
 require 'rspec/expectations'
 
 require './lib/db_fuel'
+
+def make_burner_output
+  Burner::Output.new(outs: [StringIO.new])
+end

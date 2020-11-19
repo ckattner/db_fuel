@@ -10,5 +10,10 @@
 require_relative 'library/dbee/query'
 require_relative 'library/dbee/range'
 
-Burner::Jobs.register('db_fuel/dbee/query', DbFuel::Library::Dbee::Query)
-Burner::Jobs.register('db_fuel/dbee/range', DbFuel::Library::Dbee::Range)
+module Burner
+  # Open up Burner::Jobs and add registrations for this libraries jobs.
+  class Jobs
+    register 'db_fuel/dbee/query', DbFuel::Library::Dbee::Query
+    register 'db_fuel/dbee/range', DbFuel::Library::Dbee::Range
+  end
+end

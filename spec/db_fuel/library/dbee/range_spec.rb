@@ -8,7 +8,6 @@
 #
 
 require 'spec_helper'
-require 'mocks/burner_output'
 
 describe DbFuel::Library::Dbee::Range do
   before(:each) do
@@ -69,7 +68,7 @@ describe DbFuel::Library::Dbee::Range do
     specify 'output contains number of records' do
       string_summary = output.outs.first
 
-      expect(string_summary.read).to include("Loading 2 record(s) into #{register}")
+      expect(string_summary.string).to include("Loading 2 record(s) into #{register}")
     end
 
     specify 'payload register has data' do
