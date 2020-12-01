@@ -7,6 +7,4 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-module DbFuel
-  VERSION = '1.1.0'
-end
+require_relative 'modeling/keyed_column'

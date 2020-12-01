@@ -113,8 +113,7 @@ describe DbFuel::Library::Dbee::Range do
             key: :fname,
             key_path: :first_name
           }
-        ],
-        steps: %w[load_first_names retrieve_patients]
+        ]
       }
 
       payload = Burner::Payload.new

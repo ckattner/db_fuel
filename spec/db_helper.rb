@@ -54,6 +54,7 @@ def load_data
   inactive_status = Status.create!(code: 'Inactive', priority: 2)
 
   Patient.create!(
+    chart_number: 'C0001',
     first_name: 'Bozo',
     middle_name: 'The',
     last_name: 'Clown',
@@ -61,12 +62,14 @@ def load_data
   )
 
   Patient.create!(
+    chart_number: 'R0001',
     first_name: 'Frank',
     last_name: 'Rizzo',
     status: active_status
   )
 
   Patient.create!(
+    chart_number: 'B0001',
     first_name: 'Bugs',
     middle_name: 'The',
     last_name: 'Bunny',
