@@ -1,4 +1,4 @@
-# 2.0.0 (March 10th, 2021)
+# 2.0.0 (March 16th, 2021)
 
 New Jobs:
 * db_fuel/active_record/upsert
