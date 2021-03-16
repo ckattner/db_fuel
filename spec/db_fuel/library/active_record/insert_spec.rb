@@ -25,7 +25,7 @@ describe DbFuel::Library::ActiveRecord::Insert do
         { key: :last_name }
       ],
       table_name: 'patients',
-      primary_key: {
+      primary_keyed_column: {
         key: :id
       }
     }
@@ -122,7 +122,7 @@ describe DbFuel::Library::ActiveRecord::Insert do
               { key: :last_name }
             ],
             table_name: 'patients',
-            primary_key: {
+            primary_keyed_column: {
               key: :id
             }
           }

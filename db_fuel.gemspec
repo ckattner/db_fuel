@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
     This library adds database-centric jobs to the Burner library.  Burner does not ship with database jobs out of the box.
   DESCRIPTION
 
-  s.authors     = ['Matthew Ruggio']
-  s.email       = ['mruggio@bluemarblepayroll.com']
+  s.authors     = ['Matthew Ruggio', 'John Bosko']
+  s.email       = ['mruggio@bluemarblepayroll.com', 'jbosko@bluemarblepayroll.com']
   s.files       = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   s.bindir      = 'exe'
   s.executables = %w[]
@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency('activerecord', activerecord_version)
   s.add_dependency('acts_as_hashable', '~>1.2')
-  s.add_dependency('burner', '~>1.2')
+  s.add_dependency('burner', '~>1.7')
   s.add_dependency('dbee', '~>2.1')
   s.add_dependency('dbee-active_record', '~>2.1')
   s.add_dependency('objectable', '~>1.0')
@@ -51,7 +51,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('pry', '~>0')
   s.add_development_dependency('rake', '~> 13')
   s.add_development_dependency('rspec', '~> 3.8')
-  s.add_development_dependency('rubocop', '~>0.90.0')
+  s.add_development_dependency('rubocop', '~>1.7.0')
   s.add_development_dependency('simplecov', '~>0.18.5')
   s.add_development_dependency('simplecov-console', '~>0.7.0')
   s.add_development_dependency('sqlite3', '~>1')

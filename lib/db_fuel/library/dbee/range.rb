@@ -32,14 +32,20 @@ module DbFuel
         # - register:  Name of the register to use for gathering the IN clause values and where
         #              to store the resulting recordset.
         # - separator: Character to use to split the key-path for nested object support.
+        #
+        # - debug:     If debug is set to true (defaults to false) then the SQL statements
+        #              will be printed in the output.  Only use this option while
+        #              debugging issues as it will fill
+        #              up the output with (potentially too much) data.
         def initialize(
-          name:,
           key:,
+          name: '',
           key_path: '',
           model: {},
           query: {},
           register: Burner::DEFAULT_REGISTER,
-          separator: ''
+          separator: '',
+          debug: false
         )
           raise ArgumentError, 'key is required' if key.to_s.empty?
 
@@ -51,12 +57,13 @@ module DbFuel
             model: model,
             name: name,
             query: query,
-            register: register
+            register: register,
+            debug: debug
           )
         end
 
         def perform(output, payload)
-          records = execute(sql(payload))
+          records = execute(sql(output, payload))
 
           load_register(records, output, payload)
         end
@@ -90,8 +97,13 @@ module DbFuel
           )
         end
 
-        def sql(payload)
-          ::Dbee.sql(model, compile_dbee_query(payload), provider)
+        def sql(output, payload)
+          dbee_query = compile_dbee_query(payload)
+          sql_statement = ::Dbee.sql(model, dbee_query, provider)
+
+          debug_detail(output, "Range SQL: #{sql_statement}")
+
+          sql_statement
         end
       end
     end

@@ -9,7 +9,7 @@
 
 require 'spec_helper'
 
-describe DbFuel::Library::ActiveRecord::Update do
+describe DbFuel::Library::ActiveRecord::UpdateAll do
   before(:each) do
     load_data
   end
@@ -28,7 +28,6 @@ describe DbFuel::Library::ActiveRecord::Update do
         { key: :last_name }
       ],
       table_name: 'patients',
-      primary_keyed_column: { key: :id },
       unique_attributes: [
         { key: :chart_number }
       ]
@@ -119,7 +118,7 @@ describe DbFuel::Library::ActiveRecord::Update do
   end
 
   describe 'README examples' do
-    specify 'patient update' do
+    specify 'patient update all' do
       pipeline = {
         jobs: [
           {
@@ -133,13 +132,12 @@ describe DbFuel::Library::ActiveRecord::Update do
           },
           {
             name: 'update_patients',
-            type: 'db_fuel/active_record/update',
+            type: 'db_fuel/active_record/update_all',
             register: :patients,
             attributes: [
               { key: :last_name }
             ],
             table_name: 'patients',
-            primary_keyed_column: { key: :id },
             unique_attributes: [
               { key: :chart_number }
             ]

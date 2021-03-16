@@ -22,11 +22,12 @@ module DbFuel
         attr_reader :attribute_renderers,
                     :db_provider,
                     :debug,
-                    :resolver
+                    :resolver,
+                    :attribute_renderers_set
 
         def initialize(
-          name:,
           table_name:,
+          name: '',
           attributes: [],
           debug: false,
           register: Burner::DEFAULT_REGISTER,
@@ -34,45 +35,14 @@ module DbFuel
         )
           super(name: name, register: register)
 
-          # set resolver first since make_attribute_renderers needs it.
-          @resolver            = Objectable.resolver(separator: separator)
-          @attribute_renderers = make_attribute_renderers(attributes)
-          @db_provider         = DbProvider.new(table_name)
+          @resolver = Objectable.resolver(separator: separator)
+          @attribute_renderers_set = Modeling::AttributeRendererSet.new(resolver: resolver,
+                                                                        attributes: attributes)
+          @db_provider = DbProvider.new(table_name)
           @debug = debug || false
         end
 
-        private
-
-        def make_attribute_renderers(attributes)
-          Burner::Modeling::Attribute
-            .array(attributes)
-            .map { |a| Burner::Modeling::AttributeRenderer.new(a, resolver) }
-        end
-
-        def transform(attribute_renderers, row, time)
-          attribute_renderers.each_with_object({}) do |attribute_renderer, memo|
-            value = attribute_renderer.transform(row, time)
-
-            resolver.set(memo, attribute_renderer.key, value)
-          end
-        end
-
-        def created_at_timestamp_attribute
-          timestamp_attribute(CREATED_AT)
-        end
-
-        def updated_at_timestamp_attribute
-          timestamp_attribute(UPDATED_AT)
-        end
-
-        def timestamp_attribute(key)
-          Burner::Modeling::Attribute.make(
-            key: key,
-            transformers: [
-              { type: NOW_TYPE }
-            ]
-          )
-        end
+        protected
 
         def debug_detail(output, message)
           return unless debug

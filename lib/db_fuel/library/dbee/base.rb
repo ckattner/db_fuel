@@ -14,7 +14,8 @@ module DbFuel
       class Base < Burner::JobWithRegister
         attr_reader :model,
                     :provider,
-                    :query
+                    :query,
+                    :debug
 
         # Arguments:
         # - model:    Dbee Model configuration
@@ -22,16 +23,18 @@ module DbFuel
         # - register: Name of the register to use for gathering the IN clause values and where
         #             to store the resulting recordset.
         def initialize(
-          name:,
+          name: '',
           model: {},
           query: {},
-          register: Burner::DEFAULT_REGISTER
+          register: Burner::DEFAULT_REGISTER,
+          debug: false
         )
           super(name: name, register: register)
 
           @model    = ::Dbee::Model.make(model)
           @provider = ::Dbee::Providers::ActiveRecordProvider.new
           @query    = ::Dbee::Query.make(query)
+          @debug    = debug || false
 
           freeze
         end
@@ -46,6 +49,12 @@ module DbFuel
           output.detail("Loading #{records.length} record(s) into #{register}")
 
           payload[register] = records
+        end
+
+        def debug_detail(output, message)
+          return unless debug
+
+          output.detail(message)
         end
       end
     end

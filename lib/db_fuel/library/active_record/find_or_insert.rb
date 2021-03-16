@@ -7,23 +7,24 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-require_relative 'insert'
+require_relative 'upsert'
 
 module DbFuel
   module Library
     module ActiveRecord
       # This job is a slight enhancement to the insert job, in that it will only insert new
       # records.  It will use the unique_keys to first run a query to see if it exists.
-      # Each unique_key becomes a WHERE clause.  If primary_key is specified and a record is
-      # found then the first record's id will be set to the primary_key.
+      # Each unique_key becomes a WHERE clause.  If primary_keyed_column is specified
+      # and a record is found then the first record's id will be set to
+      # the primary_keyed_column.
       #
       # Expected Payload[register] input: array of objects
       # Payload[register] output: array of objects.
-      class FindOrInsert < Insert
-        attr_reader :unique_attribute_renderers
+      class FindOrInsert < Upsert
+        # attr_reader :unique_attribute_renderers
 
         # Arguments:
-        #   name [required]: name of the job within the Burner::Pipeline.
+        #   name: name of the job within the Burner::Pipeline.
         #
         #   table_name [required]: name of the table to use for the INSERT statements.
         #
@@ -36,8 +37,9 @@ module DbFuel
         #          returned objects will be printed in the output.  Only use this option while
         #          debugging issues as it will fill up the output with (potentially too much) data.
         #
-        #   primary_key: If primary_key is present then it will be used to set the object's
-        #                property to the returned primary key from the INSERT statement.
+        #   primary_keyed_column: If primary_keyed_column is present then it will be used to set
+        #                     the object's property to the returned primary key
+        #                       from the INSERT statement.
         #
         #   separator: Just like other jobs with a 'separator' option, if the objects require
         #              key-path notation or nested object support, you can set the separator
@@ -51,28 +53,28 @@ module DbFuel
         #   unique_attributes: Each key will become a WHERE clause in order check for record
         #                      existence before insertion attempt.
         def initialize(
-          name:,
           table_name:,
+          name: '',
           attributes: [],
           debug: false,
-          primary_key: nil,
+          primary_keyed_column: nil,
           register: Burner::DEFAULT_REGISTER,
           separator: '',
           timestamps: true,
           unique_attributes: []
         )
+
           super(
             name: name,
             table_name: table_name,
             attributes: attributes,
             debug: debug,
-            primary_key: primary_key,
+            primary_keyed_column: primary_keyed_column,
             register: register,
             separator: separator,
-            timestamps: timestamps
+            timestamps: timestamps,
+            unique_attributes: unique_attributes
           )
-
-          @unique_attribute_renderers = make_attribute_renderers(unique_attributes)
         end
 
         def perform(output, payload)
@@ -82,43 +84,20 @@ module DbFuel
           payload[register] = array(payload[register])
 
           payload[register].each do |row|
-            exists = existence_check_and_mutate(output, row, payload.time)
+            exists = find_record(output, row, payload.time)
 
             if exists
               total_existed += 1
               next
             end
 
-            insert(output, row, payload.time)
+            insert_record(output, row, payload.time)
 
             total_inserted += 1
           end
 
           output.detail("Total Existed: #{total_existed}")
           output.detail("Total Inserted: #{total_inserted}")
-        end
-
-        private
-
-        def existence_check_and_mutate(output, row, time)
-          unique_row = transform(unique_attribute_renderers, row, time)
-
-          first_sql = db_provider.first_sql(unique_row)
-          debug_detail(output, "Find Statement: #{first_sql}")
-
-          first_record = db_provider.first(unique_row)
-
-          return false unless first_record
-
-          if primary_key
-            id = resolver.get(first_record, primary_key.column)
-
-            resolver.set(row, primary_key.key, id)
-          end
-
-          debug_detail(output, "Record Exists: #{first_record}")
-
-          true
         end
       end
     end

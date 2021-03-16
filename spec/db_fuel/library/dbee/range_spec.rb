@@ -16,6 +16,7 @@ describe DbFuel::Library::Dbee::Range do
 
   let(:output)   { make_burner_output }
   let(:register) { 'register_a' }
+  let(:debug)    { false }
 
   let(:config) do
     {
@@ -34,7 +35,8 @@ describe DbFuel::Library::Dbee::Range do
       },
       register: register,
       key: :fname,
-      key_path: :first_name
+      key_path: :first_name,
+      debug: debug,
     }
   end
 
@@ -58,6 +60,8 @@ describe DbFuel::Library::Dbee::Range do
     )
   end
 
+  let(:written) { output.outs.first.string }
+
   subject { described_class.make(config) }
 
   describe '#perform' do
@@ -66,9 +70,7 @@ describe DbFuel::Library::Dbee::Range do
     end
 
     specify 'output contains number of records' do
-      string_summary = output.outs.first
-
-      expect(string_summary.string).to include("Loading 2 record(s) into #{register}")
+      expect(written).to include("Loading 2 record(s) into #{register}")
     end
 
     specify 'payload register has data' do
@@ -78,6 +80,20 @@ describe DbFuel::Library::Dbee::Range do
 
       expect(records[0]).to include('first_name' => 'Bozo')
       expect(records[1]).to include('first_name' => 'Bugs')
+    end
+
+    context 'when debug is true' do
+      let(:debug) { true }
+
+      it 'outputs SQL statements' do
+        expect(written).to include('Range SQL:')
+      end
+    end
+
+    context 'when debug is false' do
+      it 'does not output does SQL statements' do
+        expect(written).not_to include('Range SQL:')
+      end
     end
   end
 

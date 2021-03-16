@@ -39,7 +39,7 @@ def load_schema
       t.string     :middle_name
       t.string     :last_name
       t.references :status
-      t.timestamps
+      t.timestamps null: true
     end
   end
 end

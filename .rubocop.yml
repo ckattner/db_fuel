@@ -1,6 +1,7 @@
 AllCops:
   TargetRubyVersion: 2.5
   NewCops: enable
+  SuggestExtensions: false
 
 Layout/LineLength:
   Max: 100
@@ -8,7 +9,7 @@ Layout/LineLength:
     - db_fuel.gemspec
 
 Metrics/BlockLength:
-  ExcludedMethods:
+  IgnoredMethods:
     - let
     - it
     - describe

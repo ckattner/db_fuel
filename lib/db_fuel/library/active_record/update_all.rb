@@ -12,11 +12,14 @@ require_relative 'upsert'
 module DbFuel
   module Library
     module ActiveRecord
-      # This job can take the objects in a register and insert them into a database table.
+      # This job can take the objects in a register and updates them within database table.
+      # The attributes translate to SQL SET clauses
+      # and the unique_keys translate to WHERE clauses.
+      # One or more records may be updated at a time.
       #
       # Expected Payload[register] input: array of objects
       # Payload[register] output: array of objects.
-      class Insert < Upsert
+      class UpdateAll < Upsert
         # Arguments:
         #   name: name of the job within the Burner::Pipeline.
         #
@@ -25,33 +28,31 @@ module DbFuel
         #   attributes:  Used to specify which object properties to put into the
         #                SQL statement and also allows for one last custom transformation
         #                pipeline, in case the data calls for SQL-specific transformers
-        #                before insertion.
+        #                before mutation.
         #
         #   debug: If debug is set to true (defaults to false) then the SQL statements and
         #          returned objects will be printed in the output.  Only use this option while
         #          debugging issues as it will fill up the output with (potentially too much) data.
-        #
-        #   primary_keyed_column: If primary_keyed_column is present then it will be used to
-        #                     set the object's property to the returned primary key
-        #                     from the INSERT statement.
         #
         #   separator: Just like other jobs with a 'separator' option, if the objects require
         #              key-path notation or nested object support, you can set the separator
         #              to something non-blank (like a period for notation in the
         #              form of: name.first).
         #
-        #   timestamps: If timestamps is true (default behavior) then both created_at
-        #               and updated_at columns will automatically have their values set
-        #               to the current UTC timestamp.
+        #   timestamps: If timestamps is true (default behavior) then the updated_at column will
+        #               automatically have its value set to the current UTC timestamp.
+        #
+        #   unique_attributes: Each key will become a WHERE clause in order to only update specific
+        #                      records.
         def initialize(
           table_name:,
           name: '',
           attributes: [],
           debug: false,
-          primary_keyed_column: nil,
           register: Burner::DEFAULT_REGISTER,
           separator: '',
-          timestamps: true
+          timestamps: true,
+          unique_attributes: []
         )
 
           attributes = Burner::Modeling::Attribute.array(attributes)
@@ -61,17 +62,33 @@ module DbFuel
             table_name: table_name,
             attributes: attributes,
             debug: debug,
-            primary_keyed_column: primary_keyed_column,
+            primary_keyed_column: nil,
             register: register,
             separator: separator,
-            timestamps: timestamps
+            timestamps: timestamps,
+            unique_attributes: unique_attributes
           )
+
+          freeze
         end
 
         def perform(output, payload)
+          total_rows_affected = 0
+
           payload[register] = array(payload[register])
 
-          payload[register].each { |row| insert_record(output, row, payload.time) }
+          payload[register].each do |row|
+            where_object = attribute_renderers_set
+                           .transform(unique_attribute_renderers, row, payload.time)
+
+            rows_affected = update(output, row, payload.time, where_object)
+
+            debug_detail(output, "Individual Rows Affected: #{rows_affected}")
+
+            total_rows_affected += rows_affected
+          end
+
+          output.detail("Total Rows Affected: #{total_rows_affected}")
         end
       end
     end

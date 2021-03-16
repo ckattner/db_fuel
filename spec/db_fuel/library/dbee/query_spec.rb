@@ -16,6 +16,7 @@ describe DbFuel::Library::Dbee::Query do
 
   let(:output)   { make_burner_output }
   let(:register) { 'register_a' }
+  let(:debug)    { false }
 
   let(:config) do
     {
@@ -32,11 +33,14 @@ describe DbFuel::Library::Dbee::Query do
           { key_path: :first_name }
         ]
       },
-      register: register
+      register: register,
+      debug: debug,
     }
   end
 
   let(:payload) { Burner::Payload.new }
+
+  let(:written) { output.outs.first.string }
 
   subject { described_class.make(config) }
 
@@ -59,6 +63,20 @@ describe DbFuel::Library::Dbee::Query do
       expect(records[0]).to include('first_name' => 'Bozo')
       expect(records[1]).to include('first_name' => 'Bugs')
       expect(records[2]).to include('first_name' => 'Frank')
+    end
+
+    context 'when debug is true' do
+      let(:debug) { true }
+
+      it 'outputs SQL statements' do
+        expect(written).to include('Query SQL:')
+      end
+    end
+
+    context 'when debug is false' do
+      it 'does not output does SQL statements' do
+        expect(written).not_to include('Query SQL:')
+      end
     end
   end
 
