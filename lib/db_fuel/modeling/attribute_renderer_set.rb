@@ -14,14 +14,8 @@ module DbFuel
     # and include timestamp attributes if needed.
     class AttributeRendererSet # :nodoc:
       NOW_TYPE   = 'r/value/now'
-
-      CREATED_AT = Burner::Modeling::Attribute.make(
-        key: :created_at, transformers: [{ type: NOW_TYPE }]
-      )
-
-      UPDATED_AT = Burner::Modeling::Attribute.make(
-        key: :updated_at, transformers: [{ type: NOW_TYPE }]
-      )
+      CREATED_AT = :created_at
+      UPDATED_AT = :updated_at
 
       attr_reader :attribute_renderers, :resolver
 
@@ -36,7 +30,7 @@ module DbFuel
 
       # Adds the attributes for created_at and updated_at to the currrent attribute renderers.
       def timestamp_created_attribute_renderers
-        timestamp_attributes = [CREATED_AT, UPDATED_AT]
+        timestamp_attributes = [created_at_timestamp_attribute, updated_at_timestamp_attribute]
 
         timestamp_attributes.map do |a|
           Burner::Modeling::AttributeRenderer.new(a, resolver)
@@ -45,7 +39,7 @@ module DbFuel
 
       # Adds the attribute for updated_at to the currrent attribute renderers.
       def timestamp_updated_attribute_renderers
-        timestamp_attributes = [UPDATED_AT]
+        timestamp_attributes = [updated_at_timestamp_attribute]
 
         timestamp_attributes.map do |a|
           Burner::Modeling::AttributeRenderer.new(a, resolver)
@@ -64,6 +58,23 @@ module DbFuel
 
           resolver.set(memo, attribute_renderer.key, value)
         end
+      end
+
+      def created_at_timestamp_attribute
+        timestamp_attribute(CREATED_AT)
+      end
+
+      def updated_at_timestamp_attribute
+        timestamp_attribute(UPDATED_AT)
+      end
+
+      def timestamp_attribute(key)
+        Burner::Modeling::Attribute.make(
+          key: key,
+          transformers: [
+            { type: NOW_TYPE }
+          ]
+        )
       end
     end
   end

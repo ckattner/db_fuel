@@ -1,3 +1,8 @@
+# 2.0.1 (March 18th, 2021)
+
+Changes:
+* Updated attribute_renderer_set to avoid an evaluation time issue with acts_as_hashable.
+
 # 2.0.0 (March 16th, 2021)
 
 New Jobs:
