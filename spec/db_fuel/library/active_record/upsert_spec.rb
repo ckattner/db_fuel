@@ -18,14 +18,17 @@ describe DbFuel::Library::ActiveRecord::Upsert do
     sleep(1)
   end
 
-  let(:output)   { make_burner_output }
-  let(:register) { 'register_a' }
-  let(:debug)    { false }
-  let(:timestamps) { true }
+  let(:output)        { make_burner_output }
+  let(:register)      { 'register_a' }
+  let(:debug)         { false }
+  let(:timestamps)    { true }
+  let(:keys_register) { 'register_for_keys' }
+  let(:keys)          { [] }
 
   let(:config) do
     {
       name: 'test_job',
+      keys_register: keys_register,
       register: register,
       debug: debug,
       attributes: [
@@ -57,6 +60,7 @@ describe DbFuel::Library::ActiveRecord::Upsert do
   let(:payload) do
     Burner::Payload.new(
       registers: {
+        keys_register => keys,
         register => patients.map { |p| {}.merge(p) } # shallow copy to preserve original
       }
     )
@@ -199,6 +203,31 @@ describe DbFuel::Library::ActiveRecord::Upsert do
 
         expect(created_at).to eq(existingPatient.created_at.to_s(:db))
         expect(updated_at).to eq(existingPatient.updated_at.to_s(:db))
+      end
+    end
+
+    context 'when keys_register has at least one key' do
+      let(:keys) { %w[chart_number first_name] }
+
+      it 'outputs list of keys' do
+        expect(written).to include("keys: #{keys.join(', ')}")
+      end
+
+      it 'only inserts/updates keys in keys_register' do
+        actual = Patient
+                 .order(:chart_number)
+                 .select(:chart_number, :first_name, :last_name)
+                 .as_json(except: :id)
+
+        expected = [
+          { 'chart_number' => 'B0001', 'first_name' => 'Bugs', 'last_name' => 'Bunny' },
+          { 'chart_number' => 'C0001', 'first_name' => 'BOZZY', 'last_name' => 'Clown' },
+          { 'chart_number' => 'G0001', 'first_name' => 'HAPPY', 'last_name' => nil },
+          { 'chart_number' => 'M0001', 'first_name' => 'BILLY', 'last_name' => nil },
+          { 'chart_number' => 'R0001', 'first_name' => 'FRANKY', 'last_name' => 'Rizzo' }
+        ]
+
+        expect(actual).to match(expected)
       end
     end
   end

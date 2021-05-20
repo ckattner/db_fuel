@@ -14,14 +14,17 @@ describe DbFuel::Library::ActiveRecord::FindOrInsert do
     load_data
   end
 
-  let(:output)   { make_burner_output }
-  let(:register) { 'register_a' }
-  let(:debug)    { false }
+  let(:output)        { make_burner_output }
+  let(:register)      { 'register_a' }
+  let(:keys_register) { 'register_for_keys' }
+  let(:keys)          { [] }
+  let(:debug)         { false }
 
   let(:config) do
     {
       name: 'test_job',
       register: register,
+      keys_register: keys_register,
       debug: debug,
       attributes: [
         { key: :chart_number },
@@ -51,6 +54,7 @@ describe DbFuel::Library::ActiveRecord::FindOrInsert do
   let(:payload) do
     Burner::Payload.new(
       registers: {
+        keys_register => keys,
         register => patients.map { |p| {}.merge(p) } # shallow copy to preserve original
       }
     )
@@ -109,6 +113,32 @@ describe DbFuel::Library::ActiveRecord::FindOrInsert do
 
       it 'outputs existing record' do
         expect(written).to include('Record Exists: {')
+      end
+    end
+
+    context 'when keys_register has at least one key' do
+      let(:keys) { %w[chart_number first_name] }
+
+      it 'outputs list of keys' do
+        expect(written).to include("keys: #{keys.join(', ')}")
+      end
+
+      it 'only inserts values for keys in keys_register' do
+        actual = Patient
+                 .order(:chart_number)
+                 .select(:chart_number, :first_name, :last_name)
+                 .as_json(except: :id)
+
+        # records with last_name previously existed and were not inserted.
+        expected = [
+          { 'chart_number' => 'B0001', 'first_name' => 'Bugs', 'last_name' => 'Bunny' },
+          { 'chart_number' => 'C0001', 'first_name' => 'Bozo', 'last_name' => 'Clown' },
+          { 'chart_number' => 'G0001', 'first_name' => 'HAPPY', 'last_name' => nil },
+          { 'chart_number' => 'M0001', 'first_name' => 'BILLY', 'last_name' => nil },
+          { 'chart_number' => 'R0001', 'first_name' => 'Frank', 'last_name' => 'Rizzo' }
+        ]
+
+        expect(actual).to match(expected)
       end
     end
   end

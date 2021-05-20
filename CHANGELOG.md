@@ -1,6 +1,14 @@
+
+# 2.1.0 (May 19th, 2021)
+
+Additions:
+
+* Added keys_register to all db_fuel/active_record jobs.
+
 # 2.0.1 (March 18th, 2021)
 
 Changes:
+
 * Updated attribute_renderer_set to avoid an evaluation time issue with acts_as_hashable.
 
 # 2.0.0 (March 16th, 2021)

@@ -57,6 +57,7 @@ module DbFuel
           name: '',
           attributes: [],
           debug: false,
+          keys_register: nil,
           primary_keyed_column: nil,
           register: Burner::DEFAULT_REGISTER,
           separator: '',
@@ -66,6 +67,7 @@ module DbFuel
 
           super(
             name: name,
+            keys_register: keys_register,
             table_name: table_name,
             attributes: attributes,
             debug: debug,
@@ -82,6 +84,7 @@ module DbFuel
           total_existed  = 0
 
           payload[register] = array(payload[register])
+          keys              = resolve_key_set(output, payload)
 
           payload[register].each do |row|
             exists = find_record(output, row, payload.time)
@@ -91,7 +94,7 @@ module DbFuel
               next
             end
 
-            insert_record(output, row, payload.time)
+            insert_record(output, row, payload.time, keys)
 
             total_inserted += 1
           end

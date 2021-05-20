@@ -24,11 +24,11 @@ Refer to the [Burner](https://github.com/bluemarblepayroll/burner) library for m
 
 ### ActiveRecord Jobs
 
-* **db_fuel/active_record/find_or_insert** [name, table_name, attributes, debug, primary_keyed_column, register, separator, timestamps, unique_attributes]: An extension of the `db_fuel/active_record/insert` job that adds an existence check before SQL insertion. The  `unique_attributes` will be converted to WHERE clauses for performing the existence check.
-* **db_fuel/active_record/insert** [name, table_name, attributes, debug, primary_keyed_column, register, separator, timestamps]: This job can take the objects in a register and insert them into a database table.  If primary_keyed_column is specified then its key will be set to the primary key.  Note that composite primary keys are not supported.  Attributes defines which object properties to convert to SQL.  Refer to the class and constructor specification for more detail.
-* **db_fuel/active_record/update_all** [name, table_name, attributes, debug, register, separator, timestamps, unique_attributes]: This job can take the objects in a register and updates them within a database table.  Attributes defines which object properties to convert to SQL SET clauses while unique_attributes translate to WHERE clauses. One or more records may be updated at a time.  Refer to the class and constructor specification for more detail.
-* **db_fuel/active_record/update** [name, table_name, attributes, debug, register, primary_keyed_column, separator, timestamps, unique_attributes]: This job can take the unique objects in a register and updates them within a database table.  Attributes defines which object properties to convert to SQL SET clauses while unique_attributes translate to WHERE clauses to find the records to update. The primary_keyed_column is used to update the unique record. Only one record will be updated per statement. Note that composite primary keys are not supported.  Refer to the class and constructor specification for more detail.
-* **db_fuel/active_record/upsert** [name, table_name, attributes, debug, primary_keyed_column, register, separator, timestamps, unique_attributes]: This job can take the objects in a register and either inserts or updates them within a database table.  Attributes defines which object properties to convert to SQL SET clauses while each key in unique_attributes become a WHERE clause in order to check for the existence of a specific record. The updated record will use the primary_keyed_column specified to perform the UPDATE operation. Note that composite primary keys are not supported. Refer to the class and constructor specification for more detail.
+* **db_fuel/active_record/find_or_insert** [name, table_name, attributes, debug, primary_keyed_column, keys_register, register, separator, timestamps, unique_attributes]: An extension of the `db_fuel/active_record/insert` job that adds an existence check before SQL insertion. The  `unique_attributes` will be converted to WHERE clauses for performing the existence check.
+* **db_fuel/active_record/insert** [name, table_name, attributes, debug, primary_keyed_column, keys_register, register, separator, timestamps]: This job can take the objects in a register and insert them into a database table.  If primary_keyed_column is specified then its key will be set to the primary key.  Note that composite primary keys are not supported.  Attributes defines which object properties to convert to SQL.  Refer to the class and constructor specification for more detail.
+* **db_fuel/active_record/update_all** [name, table_name, attributes, debug, keys_register, register, separator, timestamps, unique_attributes]: This job can take the objects in a register and updates them within a database table.  Attributes defines which object properties to convert to SQL SET clauses while unique_attributes translate to WHERE clauses. One or more records may be updated at a time.  Refer to the class and constructor specification for more detail.
+* **db_fuel/active_record/update** [name, table_name, attributes, debug, keys_register, register, primary_keyed_column, separator, timestamps, unique_attributes]: This job can take the unique objects in a register and updates them within a database table.  Attributes defines which object properties to convert to SQL SET clauses while unique_attributes translate to WHERE clauses to find the records to update. The primary_keyed_column is used to update the unique record. Only one record will be updated per statement. Note that composite primary keys are not supported.  Refer to the class and constructor specification for more detail.
+* **db_fuel/active_record/upsert** [name, table_name, attributes, debug, primary_keyed_column, keys_register, register, separator, timestamps, unique_attributes]: This job can take the objects in a register and either inserts or updates them within a database table.  Attributes defines which object properties to convert to SQL SET clauses while each key in unique_attributes become a WHERE clause in order to check for the existence of a specific record. The updated record will use the primary_keyed_column specified to perform the UPDATE operation. Note that composite primary keys are not supported. Refer to the class and constructor specification for more detail.
 
 ### Dbee Jobs
 
@@ -331,7 +331,7 @@ Each database record should have been updated with their new respective middle n
 
 #### Upserting Records
 
-Let's say we don't know if these chart_number values already exist or not. 
+Let's say we don't know if these chart_number values already exist or not.
 So we want db_fuel to either insert a record if the chart_number doesn't exist or update the record if the chart_number already exists.
 
 ````ruby
@@ -378,6 +378,10 @@ Notes:
 
 * The `unique_attributes` translate to WHERE clauses.
 * Set `debug: true` to print out each UPDATE statement in the output (not for production use.)
+
+#### Limiting The Columns Being Inserted/Updated
+
+All the db_fuel/active_record/* jobs now feature an optional `keys_register` option.  If this is set, the register will be read and used as a key filter for which fields to set.  For example, if you configure a db_fuel/active_record/insert job to update A, B, C, and D, but your keys_register contains [A,B] then only A and B will be inserted/set.  This is helpful in scenarios where you may want to outline how to update _all_ possible fields but your input set only contains a subset of those fields and you do not wish to set the others to null.
 ## Contributing
 
 ### Development Environment Configuration

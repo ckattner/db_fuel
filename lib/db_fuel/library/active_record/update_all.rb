@@ -50,6 +50,7 @@ module DbFuel
           attributes: [],
           debug: false,
           register: Burner::DEFAULT_REGISTER,
+          keys_register: nil,
           separator: '',
           timestamps: true,
           unique_attributes: []
@@ -63,6 +64,7 @@ module DbFuel
             attributes: attributes,
             debug: debug,
             primary_keyed_column: nil,
+            keys_register: keys_register,
             register: register,
             separator: separator,
             timestamps: timestamps,
@@ -73,19 +75,21 @@ module DbFuel
         end
 
         def perform(output, payload)
-          total_rows_affected = 0
-
           payload[register] = array(payload[register])
+          keys              = resolve_key_set(output, payload)
 
-          payload[register].each do |row|
-            where_object = attribute_renderers_set
-                           .transform(unique_attribute_renderers, row, payload.time)
+          total_rows_affected = payload[register].inject(0) do |memo, row|
+            where_object = attribute_renderers_set.transform(
+              unique_attribute_renderers,
+              row,
+              payload.time
+            )
 
-            rows_affected = update(output, row, payload.time, where_object)
+            rows_affected = update(output, row, payload.time, where_object, keys)
 
             debug_detail(output, "Individual Rows Affected: #{rows_affected}")
 
-            total_rows_affected += rows_affected
+            memo + rows_affected
           end
 
           output.detail("Total Rows Affected: #{total_rows_affected}")

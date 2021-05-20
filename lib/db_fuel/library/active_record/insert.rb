@@ -45,6 +45,7 @@ module DbFuel
         #               to the current UTC timestamp.
         def initialize(
           table_name:,
+          keys_register: nil,
           name: '',
           attributes: [],
           debug: false,
@@ -53,11 +54,11 @@ module DbFuel
           separator: '',
           timestamps: true
         )
-
           attributes = Burner::Modeling::Attribute.array(attributes)
 
           super(
             name: name,
+            keys_register: keys_register,
             table_name: table_name,
             attributes: attributes,
             debug: debug,
@@ -70,8 +71,11 @@ module DbFuel
 
         def perform(output, payload)
           payload[register] = array(payload[register])
+          keys              = resolve_key_set(output, payload)
 
-          payload[register].each { |row| insert_record(output, row, payload.time) }
+          output.detail("Inserting #{payload[register].count} record(s)")
+
+          payload[register].each { |row| insert_record(output, row, payload.time, keys) }
         end
       end
     end

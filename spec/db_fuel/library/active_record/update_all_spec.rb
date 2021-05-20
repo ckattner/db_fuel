@@ -14,14 +14,17 @@ describe DbFuel::Library::ActiveRecord::UpdateAll do
     load_data
   end
 
-  let(:output)   { make_burner_output }
-  let(:register) { 'register_a' }
-  let(:debug)    { false }
+  let(:output)        { make_burner_output }
+  let(:register)      { 'register_a' }
+  let(:debug)         { false }
+  let(:keys_register) { 'register_for_keys' }
+  let(:keys)          { [] }
 
   let(:config) do
     {
       name: 'test_job',
       register: register,
+      keys_register: keys_register,
       debug: debug,
       attributes: [
         { key: :first_name },
@@ -46,6 +49,7 @@ describe DbFuel::Library::ActiveRecord::UpdateAll do
   let(:payload) do
     Burner::Payload.new(
       registers: {
+        keys_register => keys,
         register => patients.map { |p| {}.merge(p) } # shallow copy to preserve original
       }
     )
@@ -113,6 +117,29 @@ describe DbFuel::Library::ActiveRecord::UpdateAll do
 
       it 'does not output return objects' do
         expect(written).not_to include('Individual Rows Affected:')
+      end
+    end
+
+    context 'when keys_register has at least one key' do
+      let(:keys) { %w[chart_number last_name] }
+
+      it 'outputs list of keys' do
+        expect(written).to include("keys: #{keys.join(', ')}")
+      end
+
+      it 'only updates keys in keys_register' do
+        actual = Patient
+                 .order(:chart_number)
+                 .select(:chart_number, :first_name, :last_name)
+                 .as_json(except: :id)
+
+        expected = [
+          { 'chart_number' => 'B0001', 'first_name' => 'Bugs', 'last_name' => 'Bunny' },
+          { 'chart_number' => 'C0001', 'first_name' => 'Bozo', 'last_name' => 'CLOWNZY' },
+          { 'chart_number' => 'R0001', 'first_name' => 'Frank', 'last_name' => 'RIZZY' }
+        ]
+
+        expect(actual).to match(expected)
       end
     end
   end

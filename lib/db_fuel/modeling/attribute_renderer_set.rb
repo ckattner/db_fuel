@@ -52,8 +52,10 @@ module DbFuel
           .map { |a| Burner::Modeling::AttributeRenderer.new(a, resolver) }
       end
 
-      def transform(attribute_renderers, row, time)
+      def transform(attribute_renderers, row, time, keys = Set.new)
         attribute_renderers.each_with_object({}) do |attribute_renderer, memo|
+          next if keys.any? && keys.exclude?(attribute_renderer.key)
+
           value = attribute_renderer.transform(row, time)
 
           resolver.set(memo, attribute_renderer.key, value)

@@ -10,13 +10,16 @@
 require 'spec_helper'
 
 describe DbFuel::Library::ActiveRecord::Insert do
-  let(:output)   { make_burner_output }
-  let(:register) { 'register_a' }
-  let(:debug)    { false }
+  let(:output)        { make_burner_output }
+  let(:register)      { 'register_a' }
+  let(:debug)         { false }
+  let(:keys_register) { 'register_for_keys' }
+  let(:keys)          { [] }
 
   let(:config) do
     {
       name: 'test_job',
+      keys_register: keys_register,
       register: register,
       debug: debug,
       attributes: [
@@ -41,6 +44,7 @@ describe DbFuel::Library::ActiveRecord::Insert do
   let(:payload) do
     Burner::Payload.new(
       registers: {
+        keys_register => keys,
         register => patients.map { |p| {}.merge(p) } # shallow copy to preserve original
       }
     )
@@ -95,6 +99,28 @@ describe DbFuel::Library::ActiveRecord::Insert do
       db_patients.each_with_index do |db_patient, _index|
         expect(db_patient.created_at).not_to be nil
         expect(db_patient.updated_at).not_to be nil
+      end
+    end
+
+    context 'when keys_register has at least one key' do
+      let(:keys) { %w[chart_number] }
+
+      it 'outputs list of keys' do
+        expect(written).to include("keys: #{keys.join(', ')}")
+      end
+
+      it 'only inserts values for keys in keys_register' do
+        db_patients = Patient
+                      .order(:chart_number)
+                      .select(:chart_number, :first_name, :last_name)
+                      .as_json(except: :id)
+
+        expected = [
+          { 'chart_number' => 'AB0', 'first_name' => nil, 'last_name' => nil },
+          { 'chart_number' => 'AB1', 'first_name' => nil, 'last_name' => nil }
+        ]
+
+        expect(db_patients).to match(expected)
       end
     end
   end

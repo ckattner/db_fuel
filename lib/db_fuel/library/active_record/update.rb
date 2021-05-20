@@ -57,6 +57,7 @@ module DbFuel
           attributes: [],
           debug: false,
           primary_keyed_column: nil,
+          keys_register: nil,
           register: Burner::DEFAULT_REGISTER,
           separator: '',
           timestamps: true,
@@ -70,6 +71,7 @@ module DbFuel
             table_name: table_name,
             attributes: attributes,
             debug: debug,
+            keys_register: keys_register,
             primary_keyed_column: primary_keyed_column,
             register: register,
             separator: separator,
@@ -81,20 +83,16 @@ module DbFuel
         end
 
         def perform(output, payload)
-          total_rows_affected = 0
-
           payload[register] = array(payload[register])
+          keys              = resolve_key_set(output, payload)
 
-          payload[register].each do |row|
-            rows_affected = 0
-
-            first_record = update_record(output, row, payload.time)
-
-            rows_affected = 1 if first_record
+          total_rows_affected = payload[register].inject(0) do |memo, row|
+            first_record  = update_record(output, row, payload.time, keys)
+            rows_affected = first_record ? 1 : 0
 
             debug_detail(output, "Individual Rows Affected: #{rows_affected}")
 
-            total_rows_affected += rows_affected
+            memo + rows_affected
           end
 
           output.detail("Total Rows Affected: #{total_rows_affected}")
