@@ -43,8 +43,8 @@ Gem::Specification.new do |s|
   s.add_dependency('activerecord', activerecord_version)
   s.add_dependency('acts_as_hashable', '~>1.2')
   s.add_dependency('burner', '~>1.7')
-  s.add_dependency('dbee', '~>2.1')
-  s.add_dependency('dbee-active_record', '~>2.1')
+  s.add_dependency('dbee', '~>3.0')
+  s.add_dependency('dbee-active_record', '~>2.2')
   s.add_dependency('objectable', '~>1.0')
 
   s.add_development_dependency('guard-rspec', '~>4.7')

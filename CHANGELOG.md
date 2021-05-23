@@ -1,4 +1,9 @@
 
+# 2.2.0 (May 23rd, 2021)
+
+Updates:
+
+* Updating dependencies for dbee to include newest versions.
 # 2.1.0 (May 19th, 2021)
 
 Additions:
