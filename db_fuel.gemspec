@@ -16,15 +16,7 @@ Gem::Specification.new do |s|
   s.files       = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   s.bindir      = 'exe'
   s.executables = %w[]
-  s.homepage    = 'https://github.com/bluemarblepayroll/db_fuel'
   s.license     = 'MIT'
-  s.metadata    = {
-    'bug_tracker_uri' => 'https://github.com/bluemarblepayroll/db_fuel/issues',
-    'changelog_uri' => 'https://github.com/bluemarblepayroll/db_fuel/blob/master/CHANGELOG.md',
-    'documentation_uri' => 'https://www.rubydoc.info/gems/db_fuel',
-    'homepage_uri' => s.homepage,
-    'source_code_uri' => s.homepage
-  }
 
   s.required_ruby_version = '>= 2.5'
 
@@ -51,6 +43,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('pry', '~>0')
   s.add_development_dependency('rake', '~> 13')
   s.add_development_dependency('rspec', '~> 3.8')
+  s.add_development_dependency('rspec_junit_formatter')
   s.add_development_dependency('rubocop', '~>1.7.0')
   s.add_development_dependency('simplecov', '~>0.18.5')
   s.add_development_dependency('simplecov-console', '~>0.7.0')

@@ -1,0 +1,72 @@
+version: 2.1
+
+orbs:
+  status_to_ms_teams: bluemarblepayroll/status_to_ms_teams_pure_bash@1.0.0
+
+jobs:
+  build:
+    parameters:
+      use-bundler-cache:
+        type: boolean
+        default: true
+
+    docker:
+      - image: circleci/ruby:2.6.6-buster
+        environment:
+          FORBID_FOCUSED_SPECS: 1
+          AR_VERSION: 5
+    working_directory: ~/db_fuel
+    steps:
+      - checkout
+
+      # TODO: wrap bundler caching logic into an Orb:
+      - when:
+          condition: << parameters.use-bundler-cache >>
+          steps:
+            - restore_cache:
+                key: v1.0.0-build-ruby-dependency-cache-{{ checksum "db_fuel.gemspec" }}-{{ checksum "Gemfile" }}-{{ checksum ".ruby-version" }}
+
+      - run: bundle install --path vendor/bundle
+
+      - when:
+          condition: << parameters.use-bundler-cache >>
+          steps:
+            - save_cache:
+                key: v1.0.0-build-ruby-dependency-cache-{{ checksum "db_fuel.gemspec" }}-{{ checksum "Gemfile" }}-{{ checksum ".ruby-version" }}
+                paths:
+                  - vendor/bundle
+
+      - store_artifacts:
+          path: Gemfile.lock
+
+      - run: bundle exec rubocop
+
+      - run: COVERAGE=true bundle exec rspec -r rspec_junit_formatter --format progress --format RspecJunitFormatter -o test-results/rspec/results.xml
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: coverage
+
+      - status_to_ms_teams/report:
+          webhook_url: $MS_TEAMS_WEBHOOK_URL
+
+workflows:
+  version: 2.1
+  build:
+    jobs:
+      - build:
+          context: org-global
+  monthly-gem-dependency-refresh-check:
+    triggers:
+      - schedule:
+          cron: '0 0 1 * *'
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build:
+          context: org-global
+          use-bundler-cache: false

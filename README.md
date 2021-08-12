@@ -1,7 +1,5 @@
 # DB Fuel
 
-[![Gem Version](https://badge.fury.io/rb/db_fuel.svg)](https://badge.fury.io/rb/db_fuel) [![Build Status](https://travis-ci.org/bluemarblepayroll/db_fuel.svg?branch=master)](https://travis-ci.org/bluemarblepayroll/db_fuel) [![Maintainability](https://api.codeclimate.com/v1/badges/21945483950d9c35fabb/maintainability)](https://codeclimate.com/github/bluemarblepayroll/db_fuel/maintainability) [![Test Coverage](https://api.codeclimate.com/v1/badges/21945483950d9c35fabb/test_coverage)](https://codeclimate.com/github/bluemarblepayroll/db_fuel/test_coverage) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 This library is a plugin for [Burner](https://github.com/bluemarblepayroll/burner).  Burner, by itself, cannot use a database.  So, if you wish to use a database as a data source or as a target for mutation then you need to add a library similar to this.
 
 ## Installation
@@ -421,7 +419,7 @@ Note: ensure you have proper authorization before trying to publish new versions
 After code changes have successfully gone through the Pull Request review process then the following steps should be followed for publishing new versions:
 
 1. Merge Pull Request into master
-2. Update `lib/db_fuel/version.rb` using [semantic versioning](https://semver.org/)
+2. Update `version.rb` using [semantic versioning](https://semver.org/)
 3. Install dependencies: `bundle`
 4. Update `CHANGELOG.md` with release notes
 5. Commit & push master to remote and ensure CI builds master successfully
