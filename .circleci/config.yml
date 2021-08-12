@@ -18,6 +18,7 @@ jobs:
     working_directory: ~/db_fuel
     steps:
       - checkout
+      - run: cp spec/config/database.yaml.ci spec/config/database.yaml
 
       # TODO: wrap bundler caching logic into an Orb:
       - when:
