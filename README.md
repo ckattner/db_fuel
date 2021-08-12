@@ -1,5 +1,7 @@
 # DB Fuel
 
+[![CircleCI](https://circleci.com/bb/bluemarble-ondemand/db_fuel/tree/master.svg?style=svg&circle-token=f1b2aed3fa173235db39da671c5b5db22e061609)](https://circleci.com/bb/bluemarble-ondemand/db_fuel/tree/master)
+
 This library is a plugin for [Burner](https://github.com/bluemarblepayroll/burner).  Burner, by itself, cannot use a database.  So, if you wish to use a database as a data source or as a target for mutation then you need to add a library similar to this.
 
 ## Installation
