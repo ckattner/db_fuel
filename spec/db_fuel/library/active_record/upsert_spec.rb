@@ -229,6 +229,18 @@ describe DbFuel::Library::ActiveRecord::Upsert do
 
         expect(actual).to match(expected)
       end
+
+      it 'still sets created_at' do
+        db_patients = Patient.where(created_at: nil)
+
+        expect(db_patients).to be_empty
+      end
+
+      it 'still sets updated_at' do
+        db_patients = Patient.where(updated_at: nil)
+
+        expect(db_patients).to be_empty
+      end
     end
   end
 end
