@@ -142,6 +142,16 @@ describe DbFuel::Library::ActiveRecord::Update do
 
         expect(actual).to match(expected)
       end
+
+      it 'updates updated_at' do
+        # The default timestamps are 1999-07-16. As long as they are not those we can consider
+        # them updated.
+        db_patients = Patient
+                      .where(updated_at: '1999-07-16')
+                      .where(chart_number: %w[C0001 R0001])
+
+        expect(db_patients).to be_empty
+      end
     end
   end
 

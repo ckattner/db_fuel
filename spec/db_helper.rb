@@ -58,14 +58,18 @@ def load_data
     first_name: 'Bozo',
     middle_name: 'The',
     last_name: 'Clown',
-    status: active_status
+    status: active_status,
+    created_at: '1999-07-16',
+    updated_at: '1999-07-16'
   )
 
   Patient.create!(
     chart_number: 'R0001',
     first_name: 'Frank',
     last_name: 'Rizzo',
-    status: active_status
+    status: active_status,
+    created_at: '1999-07-16',
+    updated_at: '1999-07-16'
   )
 
   Patient.create!(
@@ -73,6 +77,8 @@ def load_data
     first_name: 'Bugs',
     middle_name: 'The',
     last_name: 'Bunny',
-    status: inactive_status
+    status: inactive_status,
+    created_at: '1999-07-16',
+    updated_at: '1999-07-16'
   )
 end
