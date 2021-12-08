@@ -14,8 +14,8 @@ module DbFuel
     # and include timestamp attributes if needed.
     class AttributeRendererSet # :nodoc:
       NOW_TYPE   = 'r/value/now'
-      CREATED_AT = :created_at
-      UPDATED_AT = :updated_at
+      CREATED_AT = 'created_at'
+      UPDATED_AT = 'updated_at'
 
       attr_reader :attribute_renderers, :resolver
 

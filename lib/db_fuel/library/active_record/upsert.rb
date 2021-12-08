@@ -140,14 +140,17 @@ module DbFuel
                             attribute_renderers_set.attribute_renderers
                           end
 
-          if keys.any? && timestamps
-            keys += [
-              Modeling::AttributeRendererSet::CREATED_AT,
-              Modeling::AttributeRendererSet::UPDATED_AT
-            ]
-          end
+          all_keys =
+            if keys.any? && timestamps
+              keys + [
+                Modeling::AttributeRendererSet::CREATED_AT,
+                Modeling::AttributeRendererSet::UPDATED_AT
+              ]
+            else
+              keys
+            end
 
-          set_object = attribute_renderers_set.transform(dynamic_attrs, row, time, keys)
+          set_object = attribute_renderers_set.transform(dynamic_attrs, row, time, all_keys)
 
           insert_sql = db_provider.insert_sql(set_object)
 
@@ -191,9 +194,14 @@ module DbFuel
                             attribute_renderers_set.attribute_renderers
                           end
 
-          keys << Modeling::AttributeRendererSet::UPDATED_AT if keys.any? && timestamps
+          all_keys =
+            if keys.any? && timestamps
+              keys + [Modeling::AttributeRendererSet::UPDATED_AT]
+            else
+              keys
+            end
 
-          set_object = attribute_renderers_set.transform(dynamic_attrs, row, time, keys)
+          set_object = attribute_renderers_set.transform(dynamic_attrs, row, time, all_keys)
 
           update_sql = db_provider.update_sql(set_object, where_object)
 
