@@ -21,7 +21,7 @@ module DbFuel
       # Expected Payload[register] input: array of objects
       # Payload[register] output: array of objects.
       class Upsert < Base
-        attr_reader :primary_keyed_column, :timestamps, :unique_attribute_renderers
+        attr_reader :primary_keyed_column, :timestamps, :unique_record_transformer
 
         # Arguments:
         #   name: name of the job within the Burner::Pipeline.
@@ -80,8 +80,10 @@ module DbFuel
 
           @primary_keyed_column = Modeling::KeyedColumn.make(primary_keyed_column, nullable: true)
 
-          @unique_attribute_renderers = attribute_renderers_set
-                                        .make_renderers(unique_attributes)
+          @unique_record_transformer = Modeling::RecordTransformer.new(
+            resolver: resolver,
+            attributes: unique_attributes
+          )
 
           @timestamps = timestamps
 
@@ -114,7 +116,7 @@ module DbFuel
         protected
 
         def find_record(output, row, time)
-          unique_row = attribute_renderers_set.transform(unique_attribute_renderers, row, time)
+          unique_row = unique_record_transformer.transform(row, time)
 
           first_sql = db_provider.first_sql(unique_row)
 
@@ -132,25 +134,13 @@ module DbFuel
         end
 
         def insert_record(output, row, time, keys = Set.new)
-          dynamic_attrs = if timestamps
-                            # doing an INSERT and timestamps should be set
-                            # set the created_at and updated_at fields
-                            attribute_renderers_set.timestamp_created_attribute_renderers
-                          else
-                            attribute_renderers_set.attribute_renderers
-                          end
-
-          all_keys =
-            if keys.any? && timestamps
-              keys + [
-                Modeling::AttributeRendererSet::CREATED_AT,
-                Modeling::AttributeRendererSet::UPDATED_AT
-              ]
-            else
-              keys
-            end
-
-          set_object = attribute_renderers_set.transform(dynamic_attrs, row, time, all_keys)
+          set_object = record_transformer.transform(
+            row,
+            time,
+            keys: keys,
+            created_at: timestamps,
+            updated_at: timestamps
+          )
 
           insert_sql = db_provider.insert_sql(set_object)
 
@@ -186,22 +176,12 @@ module DbFuel
 
         # Updates one or many records depending on where_object passed
         def update(output, row, time, where_object, keys)
-          dynamic_attrs = if timestamps
-                            # doing an UPDATE and timestamps should be set,
-                            # modify the updated_at field, don't modify the created_at field
-                            attribute_renderers_set.timestamp_updated_attribute_renderers
-                          else
-                            attribute_renderers_set.attribute_renderers
-                          end
-
-          all_keys =
-            if keys.any? && timestamps
-              keys + [Modeling::AttributeRendererSet::UPDATED_AT]
-            else
-              keys
-            end
-
-          set_object = attribute_renderers_set.transform(dynamic_attrs, row, time, all_keys)
+          set_object = record_transformer.transform(
+            row,
+            time,
+            keys: keys,
+            updated_at: timestamps
+          )
 
           update_sql = db_provider.update_sql(set_object, where_object)
 

@@ -12,7 +12,7 @@ module DbFuel
     # Creates attribute renderers based on attributes passed.
     # Also constains methods to transform attribute renderers
     # and include timestamp attributes if needed.
-    class AttributeRendererSet # :nodoc:
+    class RecordTransformer # :nodoc:
       NOW_TYPE   = 'r/value/now'
       CREATED_AT = 'created_at'
       UPDATED_AT = 'updated_at'
@@ -28,38 +28,54 @@ module DbFuel
         freeze
       end
 
-      # Adds the attributes for created_at and updated_at to the currrent attribute renderers.
-      def timestamp_created_attribute_renderers
-        timestamp_attributes = [created_at_timestamp_attribute, updated_at_timestamp_attribute]
+      def transform(row, time, keys: Set.new, created_at: false, updated_at: false)
+        dynamic_attributes, all_keys = make_dynamic_attributes(
+          keys: keys,
+          created_at: created_at,
+          updated_at: updated_at
+        )
 
-        timestamp_attributes.map do |a|
-          Burner::Modeling::AttributeRenderer.new(a, resolver)
-        end + attribute_renderers
+        dynamic_attributes.each_with_object({}) do |attribute_renderer, memo|
+          next if all_keys.any? && all_keys.exclude?(attribute_renderer.key)
+
+          value = attribute_renderer.transform(row, time)
+
+          resolver.set(memo, attribute_renderer.key, value)
+        end
       end
 
-      # Adds the attribute for updated_at to the currrent attribute renderers.
-      def timestamp_updated_attribute_renderers
-        timestamp_attributes = [updated_at_timestamp_attribute]
+      private
 
-        timestamp_attributes.map do |a|
-          Burner::Modeling::AttributeRenderer.new(a, resolver)
-        end + attribute_renderers
+      def make_dynamic_attributes(keys:, created_at:, updated_at:)
+        dynamic_attributes = attribute_renderers
+        all_keys           = keys
+
+        if created_at
+          dynamic_attributes += [
+            Burner::Modeling::AttributeRenderer.new(created_at_timestamp_attribute, resolver)
+          ]
+
+          all_keys += [CREATED_AT] if keys.any?
+        end
+
+        if updated_at
+          dynamic_attributes += [
+            Burner::Modeling::AttributeRenderer.new(updated_at_timestamp_attribute, resolver)
+          ]
+
+          all_keys += [UPDATED_AT] if keys.any?
+        end
+
+        [
+          dynamic_attributes,
+          all_keys
+        ]
       end
 
       def make_renderers(attributes)
         Burner::Modeling::Attribute
           .array(attributes)
           .map { |a| Burner::Modeling::AttributeRenderer.new(a, resolver) }
-      end
-
-      def transform(attribute_renderers, row, time, keys = Set.new)
-        attribute_renderers.each_with_object({}) do |attribute_renderer, memo|
-          next if keys.any? && keys.exclude?(attribute_renderer.key)
-
-          value = attribute_renderer.transform(row, time)
-
-          resolver.set(memo, attribute_renderer.key, value)
-        end
       end
 
       def created_at_timestamp_attribute

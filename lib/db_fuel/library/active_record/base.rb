@@ -19,12 +19,11 @@ module DbFuel
         NOW_TYPE   = 'r/value/now'
         UPDATED_AT = :updated_at
 
-        attr_reader :attribute_renderers,
-                    :db_provider,
+        attr_reader :db_provider,
                     :debug,
                     :keys_register,
                     :resolver,
-                    :attribute_renderers_set
+                    :record_transformer
 
         def initialize(
           table_name:,
@@ -37,10 +36,14 @@ module DbFuel
         )
           super(name: name, register: register)
 
-          @keys_register           = keys_register.to_s
-          @resolver                = Objectable.resolver(separator: separator)
-          @attribute_renderers_set = Modeling::AttributeRendererSet.new(resolver: resolver,
-                                                                        attributes: attributes)
+          @keys_register = keys_register.to_s
+          @resolver      = Objectable.resolver(separator: separator)
+
+          @record_transformer = Modeling::RecordTransformer.new(
+            resolver: resolver,
+            attributes: attributes
+          )
+
           @db_provider = DbProvider.new(table_name)
           @debug = debug || false
         end

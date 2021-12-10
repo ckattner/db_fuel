@@ -8,4 +8,4 @@
 #
 
 require_relative 'modeling/keyed_column'
-require_relative 'modeling/attribute_renderer_set'
+require_relative 'modeling/record_transformer'

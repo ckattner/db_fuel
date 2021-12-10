@@ -79,12 +79,7 @@ module DbFuel
           keys              = resolve_key_set(output, payload)
 
           total_rows_affected = payload[register].inject(0) do |memo, row|
-            where_object = attribute_renderers_set.transform(
-              unique_attribute_renderers,
-              row,
-              payload.time
-            )
-
+            where_object  = unique_record_transformer.transform(row, payload.time)
             rows_affected = update(output, row, payload.time, where_object, keys)
 
             debug_detail(output, "Individual Rows Affected: #{rows_affected}")
